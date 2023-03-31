@@ -18,7 +18,6 @@ def connect():
         except mysql.connector.Error as e:
 
             # se não conseguir se conectar ao banco, espera um tempo e tenta novamente
-
             print("Erro ao conectar ao banco. Tentando novamente em 5 segundos...")
 
             time.sleep(5)

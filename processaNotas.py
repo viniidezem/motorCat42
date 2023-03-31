@@ -1,21 +1,31 @@
 from db import insert_data, exec_sql
 from preparaTabelas import montaTabelaSaida, montaTabelaEntrada, retornaNotasUtilizadasItem
 
-notasUtilizadas = {}
 
-
-def adicionaNotaUtilizada(autinc, qtdUti):
-    if autinc in notasUtilizadas:
-        notasUtilizadas[autinc] += qtdUti
-    else:
-        notasUtilizadas[autinc] = qtdUti
-
-
-def consultaNotaUtilizada(autinc):
-    return notasUtilizadas.get(autinc, 0)
-
+#
+# def adicionaNotaUtilizada(autinc, qtdUti):
+#     if autinc in notasUtilizadas:
+#         notasUtilizadas[autinc] += qtdUti
+#     else:
+#         notasUtilizadas[autinc] = qtdUti
+#
+#
+# def consultaNotaUtilizada(autinc):
+#     return notasUtilizadas.get(autinc, 0)
+#
 
 def processaItems(item):
+    notasUtilizadas = {}
+
+    def adicionaNotaUtilizada(autinc, qtdUti):
+        if autinc in notasUtilizadas:
+            notasUtilizadas[autinc] += qtdUti
+        else:
+            notasUtilizadas[autinc] = qtdUti
+
+    def consultaNotaUtilizada(autinc):
+        return notasUtilizadas.get(autinc, 0)
+
     # for item in itens:#
     codite = item['ITE_CODITE']
     codemp = item['ITE_CODEMP']
@@ -69,7 +79,8 @@ def processaItems(item):
                     #       vQtdUtilizada)
                     tupleCat42 = (vCodite, vCodEmp, vNumDocSaida, vEspDocSaida, vCodEmp, vCodCliSaida, vQtdIteSaida,
                                   vAutIncEntrada, vNumDocEntrada, vEspDocEntrada, vCodCliEntrada, vQtdUtilizada)
-                    resultCat42.append(tupleCat42)
+                    if len(tupleCat42) > 0:
+                        resultCat42.append(tupleCat42)
 
     sqlQry = "INSERT INTO CAT_42 " \
              "( CAT_CODITE , CAT_CODEMP , CAT_DOCSAI , CAT_ESPSAI , CAT_EMPSAI , CAT_CLISAI , " \
@@ -84,8 +95,3 @@ def processaItems(item):
 
     sqlQry = "UPDATE ITENS_PROCESSAR_CAT SET REALIZ = 'S' WHERE ITE_CODITE = '" + codite + "' AND ITE_CODEMP = '" + codemp + "';"
     exec_sql(sqlQry, False, True)
-
-# print(lista_ordenada)
-# if len(tabSaida) > 0:
-#     print(tabSaida[0]['DET_NUMDOC'])
-#     print('a')
