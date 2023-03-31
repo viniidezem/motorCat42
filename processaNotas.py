@@ -1,4 +1,4 @@
-from db import insert_data, exec_sql
+from db import Database
 from preparaTabelas import montaTabelaSaida, montaTabelaEntrada, retornaNotasUtilizadasItem
 
 

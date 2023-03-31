@@ -1,4 +1,4 @@
-from db import exec_sql
+from db import Database
 
 
 def itensProcessar():

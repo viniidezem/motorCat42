@@ -1,66 +1,34 @@
 import multiprocessing
-import queue
-import threading
 import time
-
-from preparaTabelas import itensProcessar
-from processaNotas import processaItems
+from threads_functions import init_task_queue, create_threads, wait_for_threads_to_finish
 
 
-# Função que executa as threads
-def worker(q, semaphore):
-    while True:
-        try:
-            item = q.get(timeout=1)
-        except queue.Empty:
-            break
+def run_threads(max_threads):
+    """Executa as threads."""
+    q = init_task_queue()
+    threads = create_threads(q, max_threads)
+    wait_for_threads_to_finish(q, threads)
 
-        # Adquire o semáforo antes de processar o item
-        semaphore.acquire()
 
-        # Processa o item
-        processaItems(item)
+def main():
+    # Define o número máximo de threads que podem executar ao mesmo tempo
+    MAX_THREADS = 1
 
-        # Libera o semáforo após processar o item
-        semaphore.release()
-        q.task_done()
-
-if __name__ == "__main__":
-
+    # Define o número de threads com base no número de núcleos da CPU
     num_cores = multiprocessing.cpu_count()
     num_threads = min(10, num_cores)
 
-    # tempo inicial
+    # Executa as threads
     tempo_inicial = time.time()
-
-    # Conecta ao banco de dados e recupera todos os itens da tabela
-    items = itensProcessar()
-
-    # Cria uma fila de tarefas e adiciona todos os itens da tabela
-    q = queue.Queue()
-    for item in items:
-        q.put(item)
-
-    # Cria um semáforo com o número máximo de threads que podem executar ao mesmo tempo
-    max_threads = 1 #num_threads
-    semaphore = threading.Semaphore(max_threads)
-
-    # Cria as threads e as inicia
-    threads = []
-    for i in range(max_threads):
-        t = threading.Thread(target=worker, args=(q, semaphore))
-        threads.append(t)
-        t.start()
-
-    # Aguarda todas as threads terminarem
-    q.join()
-    for t in threads:
-        t.join()
-
-    # tempo final
+    run_threads(MAX_THREADS)
     tempo_final = time.time()
 
-    # tempo de execução
+    # Calcula o tempo de execução
     tempo_execucao = tempo_final - tempo_inicial
 
+    # Imprime o tempo de execução
     print("Tempo de execução:", tempo_execucao, "segundos")
+
+
+if __name__ == "__main__":
+    main()
