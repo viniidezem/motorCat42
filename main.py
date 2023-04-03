@@ -1,34 +1,15 @@
-import multiprocessing
-import time
-from threads_functions import init_task_queue, create_threads, wait_for_threads_to_finish
+from threads_functions import ProcessaNotasThread
+from processaNotas import ProcessaNotas
+from db import Database
 
+# Crie uma instância da classe Database
+db = Database("localhost", "3308", "root", "citel13347", "AUTCOM_BAELETRICA")
 
-def run_threads(max_threads):
-    """Executa as threads."""
-    q = init_task_queue()
-    threads = create_threads(q, max_threads)
-    wait_for_threads_to_finish(q, threads)
+# Crie uma instância da classe ProcessaNotas passando a instância do Database como parâmetro
+processa_notas = ProcessaNotas(db)
 
+# Crie uma instância da classe ThreadsFunctions passando a instância do ProcessaNotas como parâmetro
+threads_functions = ProcessaNotasThread(db, processa_notas,)
 
-def main():
-    # Define o número máximo de threads que podem executar ao mesmo tempo
-    MAX_THREADS = 1
-
-    # Define o número de threads com base no número de núcleos da CPU
-    num_cores = multiprocessing.cpu_count()
-    num_threads = min(10, num_cores)
-
-    # Executa as threads
-    tempo_inicial = time.time()
-    run_threads(MAX_THREADS)
-    tempo_final = time.time()
-
-    # Calcula o tempo de execução
-    tempo_execucao = tempo_final - tempo_inicial
-
-    # Imprime o tempo de execução
-    print("Tempo de execução:", tempo_execucao, "segundos")
-
-
-if __name__ == "__main__":
-    main()
+# Chame o método run da classe ThreadsFunctions
+threads_functions.run()

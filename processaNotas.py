@@ -1,31 +1,25 @@
-from db import Database
-from preparaTabelas import montaTabelaSaida, montaTabelaEntrada, retornaNotasUtilizadasItem
-
-
 class ProcessaNotas:
-    def __init__(self):
-        self.db = Database("localhost", "3308", "root", "citel13347", "AUTCOM_BAELETRICA")
+    def __init__(self, db):
         self.notasUtilizadas = {}
+        self.db = db
+        # self.db = Database("localhost", "3308", "root", "citel13347", "AUTCOM_BAELETRICA")
 
     def processaItems(self, item):
-        notasUtilizadas = {}
 
         def adicionaNotaUtilizada(autinc, qtdUti):
-            if autinc in notasUtilizadas:
-                notasUtilizadas[autinc] += qtdUti
+            if autinc in self.notasUtilizadas:
+                self.notasUtilizadas[autinc] += qtdUti
             else:
-                notasUtilizadas[autinc] = qtdUti
+                self.notasUtilizadas[autinc] = qtdUti
 
         def consultaNotaUtilizada(autinc):
-            return notasUtilizadas.get(autinc, 0)
+            return self.notasUtilizadas.get(autinc, 0)
 
         # for item in itens:#
         codite = item['ITE_CODITE']
         codemp = item['ITE_CODEMP']
         resultCat42 = []
-        notasUtilizadas = retornaNotasUtilizadasItem(codite, codemp)
-        notasUtilizadas_Original = notasUtilizadas
-        # print(codite, '  ', codemp)
+        self.notasUtilizadas = retornaNotasUtilizadasItem(codite, codemp)
         tabSaida = montaTabelaSaida(codite=codite, codemp=codemp)
         tabEntrada = montaTabelaEntrada(codite=codite, codemp=codemp)
 
@@ -66,10 +60,6 @@ class ProcessaNotas:
 
                     if vQtdUtilizada > 0:
                         adicionaNotaUtilizada(vAutIncEntrada, vQtdUtilizada)
-                        # print(vCodite, '-', vCodEmp, '-|Saida: ', vNumDocSaida, '-', vEspDocSaida, '-', vCodCliSaida, '-',
-                        #       vQtdIteSaida, '|Entrada: ',
-                        #       vAutIncEntrada, '-', vNumDocEntrada, '-', vEspDocEntrada, '-', vCodCliEntrada, '-',
-                        #       vQtdUtilizada)
                         tupleCat42 = (vCodite, vCodEmp, vNumDocSaida, vEspDocSaida, vCodEmp, vCodCliSaida, vQtdIteSaida,
                                       vAutIncEntrada, vNumDocEntrada, vEspDocEntrada, vCodCliEntrada, vQtdUtilizada)
                         if len(tupleCat42) > 0:
@@ -84,7 +74,7 @@ class ProcessaNotas:
         self.db.insert_data(sqlQry, tuple(resultCat42))
 
         sqlQry = "REPLACE INTO NFEUTI ( UTI_SEQDET, UTI_QTDUTI, UTI_CODITE ) VALUES ( %s, %s, '" + codite + "'  )"
-        self.db.insert_data(sqlQry, tuple(notasUtilizadas.items()))
+        self.db.insert_data(sqlQry, tuple(self.notasUtilizadas.items()))
 
         sqlQry = "UPDATE ITENS_PROCESSAR_CAT SET REALIZ = 'S' WHERE ITE_CODITE = '" + codite + "' AND ITE_CODEMP = '" + codemp + "';"
         self.db.execute_query(sqlQry, False, True)
