@@ -1,67 +1,61 @@
 import time
+
 import mysql.connector
 
 
-class Database:
-    def __init__(self, host, port, user, password, database):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.database = database
+def connect():
+    while True:
+        try:
+            return mysql.connector.connect(
+                host="localhost",
+                port="3308",
+                user="root",
+                password="citel13347",
+                database="AUTCOM_BAELETRICA")
 
-    def connect(self, retries=5, retry_delay=5):
-        """Tenta se conectar ao banco de dados e retorna a conexão."""
-        for i in range(retries):
-            try:
-                return mysql.connector.connect(
-                    host=self.host,
-                    port=self.port,
-                    user=self.user,
-                    password=self.password,
-                    database=self.database
-                )
-            except mysql.connector.Error as e:
-                print(f"Erro ao conectar ao banco. Tentando novamente em {retry_delay} segundos...")
-                time.sleep(retry_delay)
+            break
 
-        raise Exception("Não foi possível se conectar ao banco de dados após várias tentativas.")
+        except mysql.connector.Error as e:
 
-    def execute_query(self, query, fetchall=False, commit=False, retries=5, retry_delay=5):
-        """Executa uma query no banco de dados e retorna os resultados se fetchall=True."""
-        conn = self.connect(retries, retry_delay)
-        cursor = conn.cursor()
+            # se não conseguir se conectar ao banco, espera um tempo e tenta novamente
+            print("Erro ao conectar ao banco. Tentando novamente em 5 segundos...")
 
-        for i in range(retries):
-            try:
-                cursor.execute(query)
-                result = None
-                if fetchall:
-                    result = cursor.fetchall()
-                if commit:
-                    conn.commit()
-                return result
-            except mysql.connector.Error as e:
-                print(f"Erro ao executar query: {query}. Tentando novamente em {retry_delay} segundos...")
-                time.sleep(retry_delay)
+            time.sleep(5)
 
-        raise Exception(f"Não foi possível executar a query: {query} após várias tentativas.")
 
-    def insert_data(self, sql, data, retries=5, retry_delay=5):
-        """Insere dados no banco de dados."""
-        conn = self.connect(retries, retry_delay)
-        cursor = conn.cursor()
+def exec_sql(command, retorno, commit=False):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute(command)
+    result = []
+    if retorno:
+        column_names = [i[0] for i in cursor.description]
+        rows = cursor.fetchall()
+        for row in rows:
+            values = {column_names[i]: row[i] for i in range(len(row))}
+            result.extend([values])
+        if commit:
+            conn.commit()
+            conn.close()
+        else:
+            conn.close()
+        return result
+    else:
+        if commit:
+            conn.commit()
+            conn.close()
+        else:
+            conn.close()
 
-        for i in range(retries):
-            try:
-                if isinstance(data, tuple):
-                    data = [data]
 
-                cursor.executemany(sql, data)
-                conn.commit()
-                break
-            except mysql.connector.Error as e:
-                print(f"Erro ao inserir dados: {data}. Tentando novamente em {retry_delay} segundos...")
-                time.sleep(retry_delay)
-
-        conn.close()
+def insert_data(sql, tupla):
+    conn = connect()
+    cursor = conn.cursor()
+    values = (tupla)
+    if len(values) > 0:
+        if type(values[0]) is tuple:
+            cursor.executemany(sql, values)
+        else:
+            cursor.execute(sql, values)
+        conn.commit()
+    conn.close()
