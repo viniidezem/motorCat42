@@ -1,17 +1,18 @@
 import time
-
+from leitorOpcoesIni import ler_arquivo_ini
 import mysql.connector
 
 
 def connect():
     while True:
         try:
+            config = ler_arquivo_ini()
             return mysql.connector.connect(
-                host="localhost",
-                port="3308",
+                host=config['BANCO']['numip'],
+                port=config['BANCO']['porta'],
                 user="root",
                 password="citel13347",
-                database="AUTCOM_BAELETRICA")
+                database=config['BANCO']['nomban'])
 
             break
 
