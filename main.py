@@ -43,7 +43,7 @@ if __name__ == "__main__":
         q.put(item)
 
     # Cria um semáforo com o número máximo de threads que podem executar ao mesmo tempo
-    max_threads = 1 # num_threads
+    max_threads = num_threads
     semaphore = threading.Semaphore(max_threads)
 
     # Cria as threads e as inicia
