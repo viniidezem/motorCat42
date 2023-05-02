@@ -1,8 +1,9 @@
 from db import insert_data, exec_sql
 from preparaTabelas import montaTabelaSaida, montaTabelaEntrada, retornaNotasUtilizadasItem
-
+import time
 
 def processaItems(item):
+    tempo_inicial_item = time.time()
     notasUtilizadas = {}
 
     def adicionaNotaUtilizada(autinc, qtdUti):
@@ -68,7 +69,7 @@ def processaItems(item):
 
                     if vQtdUtilizada > 0:
                         adicionaNotaUtilizada(vAutIncEntrada, vQtdUtilizada)
-                        tupleCat42 = (vCodite, vCodEmp, vNumDocSaida, vEspDocSaida, vCodEmp, vCodCliSaida, vQtdIteSaida,
+                        tupleCat42 = (vCodite, vCodEmp,vAutIncSaida, vNumDocSaida, vEspDocSaida, vCodEmp, vCodCliSaida, vQtdIteSaida,
                                       vAutIncEntrada, vNumDocEntrada, vEspDocEntrada, vCodCliEntrada, vQtdUtilizada)
                         if len(tupleCat42) > 0:
                             resultCat42.append(tupleCat42)
@@ -78,16 +79,21 @@ def processaItems(item):
             else:
                 break
 
-    sqlQry = "INSERT INTO CAT_42 " \
-             "( CAT_CODITE , CAT_CODEMP , CAT_DOCSAI , CAT_ESPSAI , CAT_EMPSAI , CAT_CLISAI , " \
-             "CAT_QTDSAI" \
-             ", CAT_INCENT , CAT_DOCENT , CAT_ESPENT , CAT_CLIENT , CAT_QTDENT ) " \
-             " VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )"
+    sqlQry = "INSERT INTO FIS_ENTSAI " \
+             "( FIS_CODITE , FIS_CODEMP , FIS_INCSAI, FIS_DOCSAI , FIS_ESPSAI , FIS_EMPSAI , FIS_CLISAI , " \
+             "FIS_QTDSAI" \
+             ", FIS_INCENT , FIS_DOCENT , FIS_ESPENT , FIS_CLIENT , FIS_QTDENT ) " \
+             " VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )"
 
     insert_data(sqlQry, tuple(resultCat42))
 
-    sqlQry = "REPLACE INTO NFEUTI ( UTI_SEQDET, UTI_QTDUTI, UTI_CODITE ) VALUES ( %s, %s, '" + codite + "'  )"
+    sqlQry = "REPLACE INTO FIS_NFEUTI ( UTI_SEQDET, UTI_QTDUTI, UTI_CODITE ) VALUES ( %s, %s, '" + codite + "'  )"
     insert_data(sqlQry, tuple(notasUtilizadas.items()))
 
-    sqlQry = "UPDATE ITENS_PROCESSAR_CAT SET REALIZ = 'S' WHERE ITE_CODITE = '" + codite + "' AND ITE_CODEMP = '" + codemp + "';"
+    sqlQry = "UPDATE ITENS_PROCESSAR_FIS SET REALIZ = 'S' WHERE ITE_CODITE = '" + codite + "' AND ITE_CODEMP = '" + codemp + "';"
     exec_sql(sqlQry, False, True)
+
+    tempo_final_item = time.time()
+    tempo_execucao_item = tempo_final_item - tempo_inicial_item
+
+    print("Tempo de execução:", tempo_execucao_item, "segundos do item:", codite , '-' , codemp)

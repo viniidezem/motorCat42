@@ -2,7 +2,7 @@ from db import exec_sql
 
 
 def itensProcessar():
-    cmd = ("SELECT ITE_CODITE, ITE_CODEMP FROM ITENS_PROCESSAR_CAT WHERE REALIZ = 'N'")
+    cmd = ("SELECT ITE_CODITE, ITE_CODEMP FROM ITENS_PROCESSAR_FIS WHERE REALIZ = 'N'")
     result = exec_sql(cmd, True)
     return result
 
@@ -55,7 +55,7 @@ def montaTabelaEntrada(codite, codemp):
 
 
 def retornaNotasUtilizadasItem(codite, codemp):
-    cmd = ("SELECT UTI_SEQDET, UTI_QTDUTI FROM NFEUTI WHERE UTI_CODITE = '"+codite+"';")
+    cmd = ("SELECT UTI_SEQDET, UTI_QTDUTI FROM FIS_NFEUTI WHERE UTI_CODITE = '"+codite+"';")
     lista = exec_sql(cmd, True)
     result = {}
     for dict in lista:

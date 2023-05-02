@@ -29,7 +29,7 @@ def worker(q, semaphore):
 if __name__ == "__main__":
 
     num_cores = multiprocessing.cpu_count()
-    num_threads = min(10, num_cores)
+    num_threads = 1 #min(10, num_cores)
 
     # tempo inicial
     tempo_inicial = time.time()

@@ -10,8 +10,8 @@ def connect():
             return mysql.connector.connect(
                 host=config['BANCO']['numip'],
                 port=config['BANCO']['porta'],
-                user="root",
-                password="citel13347",
+                user="motor_fiscal_py",
+                password="7Ma*94i0vF12",
                 database=config['BANCO']['nomban'])
 
             break
